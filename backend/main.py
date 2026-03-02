@@ -15,7 +15,11 @@ logger = setup_logger(__name__)
 async def lifespan(app: FastAPI):
     settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     settings.CHARTS_DIR.mkdir(parents=True, exist_ok=True)
-    logger.info("Directories initialized: %s, %s", settings.UPLOAD_DIR, settings.CHARTS_DIR)
+    settings.EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    logger.info(
+        "Directories initialized: %s, %s, %s",
+        settings.UPLOAD_DIR, settings.CHARTS_DIR, settings.EXPORTS_DIR,
+    )
     yield
     logger.info("Application shutting down")
 

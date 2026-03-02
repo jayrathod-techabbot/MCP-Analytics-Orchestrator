@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o"
     UPLOAD_DIR: Path = Path("uploads")
     CHARTS_DIR: Path = Path("outputs/charts")
+    EXPORTS_DIR: Path = Path("outputs/exports")
     MAX_FILE_SIZE_MB: int = 50
     SANDBOX_TIMEOUT_SECONDS: int = 30
     LOG_LEVEL: str = "INFO"

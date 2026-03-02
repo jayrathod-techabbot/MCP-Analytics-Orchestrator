@@ -1,6 +1,14 @@
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
+function truncateMiddle(name, maxStart = 12, maxEnd = 8) {
+  const dotIndex = name.lastIndexOf(".");
+  const base = dotIndex !== -1 ? name.slice(0, dotIndex) : name;
+  const ext = dotIndex !== -1 ? name.slice(dotIndex) : "";
+  if (base.length <= maxStart + maxEnd) return name;
+  return `${base.slice(0, maxStart)}...${base.slice(-maxEnd)}${ext}`;
+}
+
 const ACCEPTED_TYPES = {
   "text/csv": [".csv"],
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
@@ -28,14 +36,19 @@ export default function UploadPanel({ onUpload, isLoading, dataPreview, filename
     return (
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/50">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
               <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-900">{filename}</p>
+            <div className="min-w-0">
+              <p
+                className="text-sm font-semibold text-gray-900"
+                title={filename}
+              >
+                {truncateMiddle(filename)}
+              </p>
               <p className="text-xs text-gray-500">
                 {dataPreview.rows.toLocaleString()} rows &middot; {dataPreview.columns} columns
               </p>

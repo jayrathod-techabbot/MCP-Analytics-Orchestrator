@@ -30,6 +30,7 @@ async def analyze(request: AnalyzeRequest):
         return AnalyzeResponse(
             answer=result["answer"],
             charts=result.get("charts", []),
+            exports=result.get("exports", []),
             summary=result.get("summary"),
             insights=result.get("insights", []),
             tool_calls_made=result.get("tool_calls_made", []),

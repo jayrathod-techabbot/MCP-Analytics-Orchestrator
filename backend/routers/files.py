@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 
 from backend.config import settings
 from backend.models.schemas import ErrorResponse, UploadResponse
@@ -12,6 +13,8 @@ from backend.utils.file_handler import (
     validate_extension,
 )
 from backend.utils.logger import setup_logger
+
+XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 logger = setup_logger(__name__)
 
@@ -90,6 +93,28 @@ async def get_file_metadata(file_id: str):
         "columns": df.shape[1],
         "column_names": df.columns.tolist(),
     }
+
+
+@router.get("/exports/{filename}", tags=["exports"])
+async def download_export(filename: str):
+    if not filename.endswith(".xlsx") or "/" in filename or "\\" in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename.")
+
+    file_path = (settings.EXPORTS_DIR / filename).resolve()
+
+    if not str(file_path).startswith(str(settings.EXPORTS_DIR.resolve())):
+        raise HTTPException(status_code=400, detail="Invalid file path.")
+
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Export file not found.")
+
+    logger.info("Serving export file: %s", file_path)
+    return FileResponse(
+        path=str(file_path),
+        media_type=XLSX_MIME,
+        filename=filename,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.delete("/files/{file_id}")

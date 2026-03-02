@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import ChartViewer from "./ChartViewer";
+import ExportDownload from "./ExportDownload";
 import SummaryCard from "./SummaryCard";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -25,6 +26,7 @@ function AssistantMessage({ content }) {
             <ReactMarkdown>{data.answer}</ReactMarkdown>
           </div>
           <ChartViewer charts={data.charts} />
+          <ExportDownload exports={data.exports} />
           <SummaryCard summary={data.summary} insights={data.insights} />
           {data.tool_calls_made && data.tool_calls_made.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">

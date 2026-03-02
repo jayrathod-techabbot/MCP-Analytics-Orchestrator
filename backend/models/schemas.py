@@ -23,9 +23,17 @@ class AnalyzeRequest(BaseModel):
     conversation_history: list[ConversationMessage] = []
 
 
+class ExportInfo(BaseModel):
+    download_url: str
+    filename: str
+    rows_exported: int | None = None
+    columns_exported: list[str] = []
+
+
 class AnalyzeResponse(BaseModel):
     answer: str
     charts: list[str] = []
+    exports: list[ExportInfo] = []
     summary: str | None = None
     insights: list[str] = []
     tool_calls_made: list[str] = []

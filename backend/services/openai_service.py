@@ -46,6 +46,7 @@ def run_analysis(
 
     tool_calls_made: list[str] = []
     charts: list[str] = []
+    exports: list[dict] = []
     summary: str | None = None
     insights: list[str] = []
     total_tokens = 0
@@ -104,6 +105,14 @@ def run_analysis(
                     if fn_name == "generate_chart" and "chart_url" in result_data:
                         charts.append(result_data["chart_url"])
 
+                    if fn_name == "export_to_excel" and "download_url" in result_data:
+                        exports.append({
+                            "download_url": result_data["download_url"],
+                            "filename": result_data.get("filename", "export.xlsx"),
+                            "rows_exported": result_data.get("rows_exported"),
+                            "columns_exported": result_data.get("columns_exported", []),
+                        })
+
                     if fn_name == "summarize_findings":
                         if "summary" in result_data:
                             summary = result_data["summary"]
@@ -123,6 +132,7 @@ def run_analysis(
         return {
             "answer": answer,
             "charts": charts,
+            "exports": exports,
             "summary": summary,
             "insights": insights,
             "tool_calls_made": tool_calls_made,
@@ -134,6 +144,7 @@ def run_analysis(
     return {
         "answer": last_content or "Analysis reached the maximum number of steps. Here are the results gathered so far.",
         "charts": charts,
+        "exports": exports,
         "summary": summary,
         "insights": insights,
         "tool_calls_made": tool_calls_made,

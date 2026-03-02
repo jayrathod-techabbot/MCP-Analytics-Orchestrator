@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from backend.mcp.tools.export_to_excel import (
+    TOOL_SCHEMA as EXPORT_SCHEMA,
+    export_to_excel,
+)
 from backend.mcp.tools.generate_chart import (
     TOOL_SCHEMA as CHART_SCHEMA,
     generate_chart,
@@ -35,6 +39,7 @@ _TOOLS: dict[str, ToolEntry] = {
     "generate_chart": ToolEntry(fn=generate_chart, schema=CHART_SCHEMA),
     "summarize_findings": ToolEntry(fn=summarize_findings, schema=SUMMARY_SCHEMA),
     "python_sandbox": ToolEntry(fn=python_sandbox, schema=SANDBOX_SCHEMA),
+    "export_to_excel": ToolEntry(fn=export_to_excel, schema=EXPORT_SCHEMA),
 }
 
 
