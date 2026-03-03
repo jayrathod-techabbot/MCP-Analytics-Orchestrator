@@ -30,8 +30,8 @@ An **AI-powered data analysis assistant** that allows users to upload CSV or Exc
 │                     FastAPI Backend                              │
 │                                                                  │
 │   ┌──────────────────────────────────────────────────────────┐  │
-│   │             OpenAI Service (Tool-Calling Loop)            │  │
-│   │  User Message → GPT-4o → tool_calls[] → execute tools    │  │
+│   │        LLM Service (Tool-Calling Loop)                    │  │
+│   │  User Message → OpenAI/Groq → tool_calls[] → execute tools│  │
 │   └──────────────────────────┬───────────────────────────────┘  │
 │                              ▼                                   │
 │   ┌──────────────────────────────────────────────────────────┐  │
@@ -60,7 +60,7 @@ An **AI-powered data analysis assistant** that allows users to upload CSV or Exc
 |---|---|
 | Python env | **UV** |
 | Backend | **FastAPI** (async) |
-| LLM | **OpenAI GPT-4o** (tool-calling) |
+| LLM | **OpenAI GPT-4o** or **Groq Llama 3** (tool-calling) |
 | MCP pattern | **In-process registry** |
 | Charts | **Matplotlib + Seaborn** |
 | Sandbox | **Docker python:3.12-slim** |
@@ -126,7 +126,7 @@ ai-data-analyst/
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/api/upload` | Upload CSV/Excel file |
-| `POST` | `/api/analyze` | Run AI analysis on uploaded file |
+| `POST` | `/api/analyze` | Run AI analysis on uploaded file (supports `provider` parameter: "openai" or "groq") |
 | `GET` | `/api/files/{file_id}` | Get file metadata |
 | `DELETE` | `/api/files/{file_id}` | Delete uploaded file |
 | `GET` | `/charts/{filename}` | Serve chart PNG (static) |
@@ -166,7 +166,7 @@ uv sync
 
 # Configure environment
 cp .env.example .env
-# Edit .env → add your OPENAI_API_KEY
+# Edit .env → add your OPENAI_API_KEY (or GROQ_API_KEY for Groq)
 
 # (Optional) Build sandbox Docker image
 docker build -t data-analyst-sandbox:latest ./sandbox
@@ -174,6 +174,11 @@ docker build -t data-analyst-sandbox:latest ./sandbox
 # Run backend
 uv run uvicorn backend.main:app --reload --port 8000
 ```
+
+**Multi-Provider Setup:**
+- **OpenAI**: Set `OPENAI_API_KEY` in `.env` (default provider)
+- **Groq**: Set `GROQ_API_KEY` in `.env` and use `provider: "groq"` in API requests
+- **LangSmith**: Set `LANGCHAIN_API_KEY` for optional tracing and monitoring
 
 ### 2. Frontend
 
@@ -199,11 +204,21 @@ npm run dev
 |---|---|---|---|
 | `OPENAI_API_KEY` | Yes | — | Your OpenAI API key |
 | `OPENAI_MODEL` | No | `gpt-4o` | OpenAI model to use |
+| `GROQ_API_KEY` | No | — | Your Groq API key (alternative to OpenAI) |
+| `GROQ_MODEL` | No | `llama3-70b-8192` | Groq model to use |
+| `LANGCHAIN_API_KEY` | No | — | LangSmith API key for tracing |
+| `LANGCHAIN_PROJECT` | No | `ai-data-analyst` | LangSmith project name |
+| `LANGCHAIN_TRACING_V2` | No | `true` | Enable LangSmith tracing |
 | `UPLOAD_DIR` | No | `uploads` | Directory for uploaded files |
 | `CHARTS_DIR` | No | `outputs/charts` | Directory for generated charts |
 | `MAX_FILE_SIZE_MB` | No | `50` | Maximum upload file size |
 | `SANDBOX_TIMEOUT_SECONDS` | No | `30` | Docker sandbox timeout |
 | `LOG_LEVEL` | No | `INFO` | Logging level |
+| `LOG_FILE_PATH` | No | `logs/app.log` | Rotating log file path |
+| `LOG_MAX_BYTES` | No | `10485760` | Max bytes per log file before rotation |
+| `LOG_BACKUP_COUNT` | No | `3` | Number of rotated backup files to retain |
+
+Backend logging writes to console and a rotating file. Rotation keeps one active log file plus up to 3 backups.
 
 ---
 

@@ -1,7 +1,7 @@
 import json
 
+from groq import Groq
 from langsmith import traceable
-from openai import OpenAI
 
 from backend.config import settings
 from backend.mcp.executor import execute_tool
@@ -29,13 +29,28 @@ SYSTEM_PROMPT = """You are an expert data analyst assistant. You help users anal
 - If a tool returns an error, explain the issue to the user and suggest alternatives."""
 
 
-@traceable(name="openai_run_analysis")
+@traceable(name="groq_run_analysis")
+def call_groq_llm(messages: list[dict], tools: list[dict]) -> dict:
+    response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=messages,
+            tools=tools,
+            tool_choice="auto",
+        )
+    return response
+
 def run_analysis(
     file_path: str,
     question: str,
     conversation_history: list[ConversationMessage],
 ) -> dict:
-    client = OpenAI(api_key=settings.OPENAI_API_KEY)
+    """Run data analysis using Groq LLM with tool-calling loop.
+
+    Mirrors the behaviour of openai_service.run_analysis exactly,
+    returning the same dict shape so the router can swap providers
+    transparently.
+    """
+    client = Groq(api_key=settings.GROQ_API_KEY)
     tools = get_openai_tools()
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -56,12 +71,7 @@ def run_analysis(
     for iteration in range(MAX_TOOL_ITERATIONS):
         logger.info("Tool-calling loop iteration %d", iteration + 1)
 
-        response = client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
-        )
+        response = call_groq_llm(messages, tools)
 
         if response.usage:
             total_tokens += response.usage.total_tokens

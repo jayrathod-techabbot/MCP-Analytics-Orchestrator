@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException
 
 from backend.models.schemas import AnalyzeRequest, AnalyzeResponse, ErrorResponse
-from backend.services.openai_service import run_analysis
+from backend.services.groq_service import run_analysis as groq_run_analysis
+from backend.services.openai_service import run_analysis as openai_run_analysis
 from backend.utils.file_handler import resolve_upload_path
 from backend.utils.logger import setup_logger
 
@@ -18,10 +19,17 @@ router = APIRouter(prefix="/api", tags=["analysis"])
 async def analyze(request: AnalyzeRequest):
     file_path = resolve_upload_path(request.file_id)
     if file_path is None:
-        raise HTTPException(status_code=404, detail="File not found. Please upload again.")
+        raise HTTPException(
+            status_code=404, detail="File not found. Please upload again."
+        )
+
+    _run_analysis = (
+        openai_run_analysis if request.provider == "openai" else groq_run_analysis
+    )
+    logger.info("Using provider: %s", request.provider)
 
     try:
-        result = run_analysis(
+        result = _run_analysis(
             file_path=str(file_path.resolve()),
             question=request.question,
             conversation_history=request.conversation_history,

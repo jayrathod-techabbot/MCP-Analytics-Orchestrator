@@ -79,6 +79,10 @@ def run_pandas_query(file_path: str, query_code: str) -> str:
         if safety_error:
             return json.dumps({"error": safety_error})
 
+        # Log the pandas query being executed
+        logger.info("Executing pandas query: %s", query_code)
+        logger.info("On file: %s", file_path)
+
         path = Path(file_path)
         ext = path.suffix.lower()
         if ext in (".xlsx", ".xls"):

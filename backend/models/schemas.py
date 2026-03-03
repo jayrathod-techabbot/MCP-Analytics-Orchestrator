@@ -21,6 +21,7 @@ class AnalyzeRequest(BaseModel):
     file_id: str
     question: str = Field(min_length=1, max_length=2000)
     conversation_history: list[ConversationMessage] = []
+    provider: Literal["openai", "groq"] = "openai"
 
 
 class ExportInfo(BaseModel):
