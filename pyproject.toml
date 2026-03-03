@@ -20,6 +20,8 @@ dependencies = [
     "aiofiles>=23.2.0",
     "groq>=1.0.0",
     "langsmith>=0.7.10",
+    "jupyter-client>=8.8.0",
+    "ipykernel>=7.2.0",
 ]
 
 [tool.uv]
